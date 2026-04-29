@@ -179,3 +179,189 @@ Dashboard 頂部「✨ 開始分析」按鈕，Gemini 會讀取當前所有持�
 ## License
 
 MIT
+
+---
+
+---
+
+# 💰 Portfolio Tracker
+
+A local-first investment portfolio tracker that automatically fetches real-time prices for Taiwan stocks, US stocks, ETFs, and crypto. Calculates market value and P&L, and provides on-demand AI analysis powered by Gemini.
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| **Multi-asset support** | Taiwan stocks, US stocks, Taiwan/US ETFs, Taiwan mutual funds, crypto, commodities (gold, etc.) |
+| **Real-time prices** | Fetched via yfinance, one-click refresh, auto-converted to TWD |
+| **Allocation chart** | Visualize position weights (donut chart + detail list), same symbol merged automatically |
+| **P&L Heatmap** | Treemap where block size = market value, color intensity = gain/loss % |
+| **Value trend** | Market value vs. cost line chart — 30d / 90d / 180d / 1y |
+| **History backfill** | Reconstruct the past year of daily snapshots using yfinance historical data |
+| **Technical indicators** | Per-stock page: candlestick chart, MA5/20/60, MACD, KD, volume |
+| **AI analysis** | On-demand Gemini analysis: overall performance, allocation review, risk, suggestions |
+| **Analysis history** | Every AI analysis saved by timestamp — browse previous results anytime |
+| **AI advisor chat** | Conversational AI advisor with your live portfolio as context |
+| **Portfolio news** | Dashboard auto-aggregates news for your top 10 holdings (Taiwan stocks via Anue API, others via yfinance), cached 30 min |
+| **Broker tabs** | Tag holdings by broker in the notes field; filter by broker tab in the Holdings page |
+| **CSV export** | One-click download of holdings with current price, market value, and P&L |
+| **Dark mode** | Follows system preference; toggle manually in the sidebar |
+| **Price ticker** | Live scrolling ticker at the top showing all holdings with price change |
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Python 3.11+ · FastAPI · SQLModel · SQLite |
+| **Price source** | yfinance (Taiwan `.TW`, US stocks, ETFs, crypto, commodities) |
+| **Taiwan mutual funds** | fundclear.com.tw scraper fallback |
+| **Taiwan stock news** | Anue (鉅亨網) public API |
+| **Scheduler** | APScheduler (auto snapshot at 18:00 / 22:00 Asia/Taipei) |
+| **AI** | Google Gemini 2.5 Flash (google-genai SDK) |
+| **Frontend** | React 19 · TypeScript · Vite · Tailwind CSS v4 |
+| **Charts** | Recharts · pure SVG Treemap |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 20+
+- Gemini API Key ([get one free](https://aistudio.google.com/app/apikey) — only needed for AI features)
+
+### Install & Run
+
+```bash
+git clone https://github.com/chiefchkimo/portfolio-tracker.git
+cd portfolio-tracker
+
+# Set up environment variables
+cp backend/.env.example backend/.env
+# Edit backend/.env and fill in: GEMINI_API_KEY=...
+
+# One-command start (creates venv and installs packages on first run)
+bash start.sh
+```
+
+Once running:
+
+- **Frontend**: http://localhost:3000
+- **API docs**: http://localhost:8000/docs
+
+### Environment Variables
+
+Create `backend/.env`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+Without a key, AI features (analysis & advisor chat) return 503. All other features work normally.
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── start.sh                        # One-command startup script
+├── backend/
+│   ├── main.py                     # FastAPI app
+│   ├── models.py                   # SQLModel table definitions
+│   ├── schemas.py                  # Pydantic schemas
+│   ├── database.py                 # SQLite connection
+│   ├── requirements.txt
+│   ├── routers/
+│   │   ├── holdings.py             # Holdings CRUD
+│   │   ├── prices.py               # Price refresh
+│   │   ├── portfolio.py            # Summary / allocation / history / news
+│   │   ├── stocks.py               # Stock detail (technical indicators)
+│   │   └── chat.py                 # AI advisor & analysis
+│   ├── services/
+│   │   ├── price_fetcher.py        # yfinance wrapper
+│   │   ├── tw_news.py              # Anue API wrapper (Taiwan news)
+│   │   └── scheduler.py            # APScheduler jobs
+│   └── data/
+│       └── portfolio.db            # SQLite database (gitignored)
+└── frontend/
+    ├── src/
+    │   ├── pages/
+    │   │   ├── DashboardPage.tsx   # Overview (AI analysis, summary, charts, news)
+    │   │   ├── HoldingsPage.tsx    # Holdings list
+    │   │   ├── StockDetailPage.tsx # Stock detail (candlestick, MA, MACD, KD)
+    │   │   ├── HistoryPage.tsx     # History log
+    │   │   └── ChatPage.tsx        # AI advisor chat
+    │   ├── components/
+    │   │   ├── Charts/             # AllocationPie · ValueTrendLine · PnlHeatmap
+    │   │   ├── Holdings/           # HoldingTable · HoldingForm
+    │   │   ├── Summary/            # SummaryCards
+    │   │   └── Layout/             # Layout · Ticker
+    │   ├── context/
+    │   │   └── ThemeContext.tsx    # Dark mode management
+    │   ├── store/
+    │   │   └── usePortfolioStore.ts # Zustand global state
+    │   └── api/
+    │       └── client.ts           # Axios API client
+    └── vite.config.ts              # /api → localhost:8000 proxy
+```
+
+---
+
+## 📊 Supported Asset Types
+
+| Type | Example Symbol | Currency |
+|---|---|---|
+| Taiwan Stock | `2330.TW`, `2317.TW` | TWD |
+| US Stock | `AAPL`, `NVDA`, `TSLA` | USD |
+| Taiwan ETF | `0050.TW`, `00878.TW` | TWD |
+| US ETF | `VOO`, `QQQ`, `SPY` | USD |
+| Taiwan Mutual Fund | `0P0000XXXX.TW` | TWD |
+| Crypto | `BTC-USD`, `ETH-USD` | USD |
+| Commodities | `GC=F` (Gold), `SI=F` (Silver), `CL=F` (Oil) | TWD |
+
+---
+
+## 🤖 AI Features
+
+### Portfolio Analysis
+Click **✨ Start Analysis** on the Dashboard. Gemini reads your current holdings and generates:
+- Overall performance summary
+- Allocation assessment (region / asset class / concentration)
+- Key risk factors
+- Actionable improvement suggestions
+
+Each analysis is saved with a timestamp — click any chip to review past results.
+
+### AI Advisor Chat
+The **AI Advisor** page supports multi-turn conversation. Every request includes your latest portfolio data as context.
+
+> ⚠️ AI output is for reference only and does not constitute formal investment advice.
+
+---
+
+## 📝 Usage Guide
+
+1. **Add holdings**: Go to Holdings → click **+ Add Holding**, enter the symbol and the app auto-fetches the name
+2. **Refresh prices**: Click **🔄 Refresh Prices** for an immediate update, or let the daily scheduler run automatically
+3. **Backfill history**: On first use, click **Backfill History** to load the past year of daily NAV data
+4. **Taiwan mutual funds**: If auto-fetch fails, click **Enter NAV** in the holdings list to input the daily NAV manually
+5. **Broker filter**: Enter a broker name in the notes field (e.g. Futu, Firstrade) to enable broker tab filtering in the Holdings page
+6. **AI analysis**: Call on demand — results are saved automatically and won't consume quota until you press the button
+
+---
+
+## 🔒 Privacy
+
+All data is stored locally in `backend/data/portfolio.db` (SQLite). No holdings data is sent to any external service — unless you explicitly trigger AI analysis, at which point a holdings summary is sent to the Google Gemini API.
+
+---
+
+## License
+
+MIT
