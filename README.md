@@ -53,7 +53,7 @@
 ### 安裝與啟動
 
 ```bash
-git clone https://github.com/your-username/portfolio-tracker.git
+git clone https://github.com/chiefchkimo/portfolio-tracker.git
 cd portfolio-tracker
 
 # 設定環境變數
